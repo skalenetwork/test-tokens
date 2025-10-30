@@ -25,57 +25,64 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
-contract ERC721MetaExample is AccessControlEnumerable, ERC721URIStorage, ERC721Burnable {
-
+contract ERC721MetaExample is
+    AccessControlEnumerable,
+    ERC721URIStorage,
+    ERC721Burnable
+{
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     constructor(
         string memory contractName,
         string memory contractSymbol
-    )
-        ERC721(contractName, contractSymbol)
-    {
+    ) ERC721(contractName, contractSymbol) {
         _setRoleAdmin(MINTER_ROLE, MINTER_ROLE);
         _setupRole(MINTER_ROLE, _msgSender());
     }
 
-    function mint(address to, uint256 tokenId)
-        external
-        returns (bool)
-    {
+    function mint(address to, uint256 tokenId) external returns (bool) {
         require(hasRole(MINTER_ROLE, _msgSender()), "Sender is not a Minter");
         _mint(to, tokenId);
         return true;
     }
 
-    function setTokenURI(uint256 tokenId, string calldata tokenUri)
-        external
-        returns (bool)
-    {
+    function setTokenURI(
+        uint256 tokenId,
+        string calldata tokenUri
+    ) external returns (bool) {
         require(_exists(tokenId), "Token does not exists");
         _setTokenURI(tokenId, tokenUri);
         return true;
     }
 
-    function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(
+        bytes4 interfaceId
+    )
         public
         view
-        override(AccessControlEnumerable, ERC721)
+        override(AccessControlEnumerable, ERC721, ERC721URIStorage)
         returns (bool)
     {
-        return interfaceId == type(IAccessControlEnumerable).interfaceId
-            || interfaceId == type(IERC721).interfaceId
-            || interfaceId == type(IERC721Metadata).interfaceId
-            || interfaceId == bytes4(keccak256(abi.encodePacked("mint(address,uint256)")))
-            || interfaceId == bytes4(keccak256(abi.encodePacked("burn(uint256)")))
-            || super.supportsInterface(interfaceId);
+        return
+            interfaceId == type(IAccessControlEnumerable).interfaceId ||
+            interfaceId == type(IERC721).interfaceId ||
+            interfaceId == type(IERC721Metadata).interfaceId ||
+            interfaceId ==
+            bytes4(keccak256(abi.encodePacked("mint(address,uint256)"))) ||
+            interfaceId ==
+            bytes4(keccak256(abi.encodePacked("burn(uint256)"))) ||
+            super.supportsInterface(interfaceId);
     }
 
-    function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+    function tokenURI(
+        uint256 tokenId
+    ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return ERC721URIStorage.tokenURI(tokenId);
     }
 
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
+    function _burn(
+        uint256 tokenId
+    ) internal override(ERC721, ERC721URIStorage) {
         ERC721URIStorage._burn(tokenId);
     }
 }
